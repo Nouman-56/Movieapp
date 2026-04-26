@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>FlixHub | Seasons & Episodes | Netflix Style</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #141414; font-family: 'Inter', sans-serif; color: #fff; overflow-x: hidden; }
+        
+        ::-webkit-scrollbar { width: 8px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #2d2d2d; }
+        ::-webkit-scrollbar-thumb { background: #e50914; border-radius: 4px; }
+        
+        .header { background: linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 50%, transparent 100%); padding: 20px 40px; position: sticky; top: 0; z-index: 1000; transition: all 0.3s ease; }
+        .header.scrolled { background: #141414; border-bottom: 1px solid rgba(229,9,20,0.3); }
+        .header-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+        .logo h1 { font-size: 28px; font-weight: 800; background: linear-gradient(135deg, #E50914, #B20710); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        
+        .parent-mode-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(229,9,20,0.5); padding: 8px 20px; border-radius: 40px; color: white; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; }
+        .parent-mode-btn.active { background: #E50914; }
+        .parent-mode-btn:hover { transform: scale(1.05); }
+        
+        .search-box { display: flex; align-items: center; background: rgba(0,0,0,0.75); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 8px 15px; transition: all 0.3s; }
+        .search-box:focus-within { border-color: #E50914; }
+        .search-box input { background: transparent; border: none; padding: 8px; color: white; width: 250px; outline: none; font-size: 14px; }
+        .search-box button { background: transparent; border: none; color: white; cursor: pointer; transition: color 0.3s; }
+        .search-box button:hover { color: #E50914; }
+        
+        /* Hero Slider */
+        .hero-section { max-width: 100%; margin: 0 auto; position: relative; margin-top: -80px; }
+        .slider-container { position: relative; overflow: hidden; }
+        .slider-wrapper { display: flex; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); cursor: grab; }
+        .slide { min-width: 100%; position: relative; aspect-ratio: 16/9; }
+        .slide img { width: 100%; height: 100%; object-fit: cover; }
+        .slide-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 50%, transparent 100%); padding: 80px 60px 40px; }
+        .slide-badge { display: inline-block; background: #E50914; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; margin-bottom: 15px; }
+        .slide-title { font-size: 48px; font-weight: 800; margin-bottom: 15px; max-width: 60%; }
+        .slide-desc { font-size: 16px; color: #ddd; max-width: 50%; line-height: 1.5; }
+        .slider-nav button { position: absolute; top: 50%; transform: translateY(-50%); width: 50px; height: 50px; background: rgba(0,0,0,0.5); border: none; border-radius: 50%; color: white; cursor: pointer; transition: all 0.3s; z-index: 10; }
+        .slider-nav button:hover { background: #E50914; transform: translateY(-50%) scale(1.1); }
+        .slider-nav button:first-child { left: 30px; }
+        .slider-nav button:last-child { right: 30px; }
+        .slider-dots { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; z-index: 10; }
+        .dot { width: 10px; height: 10px; background: rgba(255,255,255,0.5); border-radius: 50%; cursor: pointer; transition: all 0.3s; }
+        .dot.active { width: 30px; background: #E50914; border-radius: 10px; }
+        
+        /* Categories */
+        .categories { max-width: 1400px; margin: 30px auto 20px; padding: 0 40px; display: flex; gap: 15px; flex-wrap: wrap; }
+        .cat-btn { background: rgba(255,255,255,0.1); border: none; padding: 8px 24px; border-radius: 20px; color: #fff; cursor: pointer; transition: all 0.3s; font-size: 14px; font-weight: 500; }
+        .cat-btn:hover, .cat-btn.active { background: #E50914; transform: scale(1.05); }
+        
+        .section-title { max-width: 1400px; margin: 40px auto 20px; padding: 0 40px; font-size: 24px; font-weight: 700; display: flex; align-items: center; gap: 12px; }
+        .section-title i { color: #E50914; font-size: 28px; }
+        .section-title .badge { background: #E50914; padding: 4px 12px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-left: 10px; }
+        
+        .movies-container { max-width: 1400px; margin: 0 auto; padding: 0 40px 20px; }
+        .movies-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
+        
+        .movie-card { background: #1a1a1a; border-radius: 8px; overflow: hidden; transition: all 0.3s ease; cursor: pointer; position: relative; }
+        .movie-card:hover { transform: scale(1.05); z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        .movie-thumbnail { position: relative; aspect-ratio: 2/3; overflow: hidden; }
+        .movie-thumbnail img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+        .movie-card:hover .movie-thumbnail img { transform: scale(1.1); }
+        .movie-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
+        .movie-card:hover .movie-overlay { opacity: 1; }
+        .play-icon { width: 50px; height: 50px; background: #E50914; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 0.3s; }
+        .play-icon:hover { transform: scale(1.1); }
+        .movie-info { padding: 12px; }
+        .movie-title { font-weight: 600; font-size: 14px; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .movie-meta { display: flex; justify-content: space-between; font-size: 12px; color: #b3b3b3; }
+        .movie-rating { color: #ffd700; }
+        .badge-adult { position: absolute; top: 10px; right: 10px; background: #E50914; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; z-index: 5; }
+        .badge-child { position: absolute; top: 10px; right: 10px; background: #2ecc71; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; z-index: 5; }
+        .badge-series { position: absolute; top: 10px; left: 10px; background: #3498db; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; z-index: 5; }
+        
+        .reminder-btn { background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 8px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; transition: all 0.3s; margin-top: 10px; width: 100%; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .reminder-btn:hover { background: #E50914; }
+        .reminder-btn.reminder-set { background: rgba(46,204,113,0.3); color: #2ecc71; }
+        .download-btn { background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 8px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; transition: all 0.3s; margin-top: 8px; width: 100%; font-weight: 500; }
+        .download-btn:hover { background: #E50914; }
+        
+        @keyframes bellRing { 0%,100%{transform:rotate(0)} 25%{transform:rotate(15deg)} 50%{transform:rotate(-15deg)} 75%{transform:rotate(5deg)} }
+        .bell-animation { animation: bellRing 0.5s ease-in-out; }
+        
+        /* Seasons Modal */
+        .seasons-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; display: none; align-items: center; justify-content: center; overflow-y: auto; padding: 40px; }
+        .seasons-modal.active { display: flex; }
+        .seasons-container { background: #1a1a1a; border-radius: 16px; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto; }
+        .seasons-header { padding: 20px; background: #141414; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; }
+        .seasons-header h3 { color: #E50914; }
+        .close-seasons { background: rgba(255,255,255,0.1); border: none; width: 36px; height: 36px; border-radius: 50%; color: white; cursor: pointer; }
+        .season-item { border-bottom: 1px solid #333; }
+        .season-title { padding: 15px 20px; background: #1a1a1a; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+        .season-title:hover { background: #2a2a2a; }
+        .season-title i { transition: transform 0.3s; }
+        .season-title.active i { transform: rotate(180deg); }
+        .episodes-list { display: none; padding: 0 20px 20px; background: #0f0f0f; }
+        .episodes-list.show { display: block; }
+        .episode-item { padding: 12px; border-bottom: 1px solid #333; cursor: pointer; transition: all 0.3s; display: flex; gap: 15px; align-items: center; }
+        .episode-item:hover { background: #2a2a2a; }
+        .episode-number { background: #E50914; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .episode-info { flex: 1; }
+        .episode-title { font-weight: 500; margin-bottom: 5px; }
+        .episode-duration { font-size: 11px; color: #888; }
+        .episode-play { color: #E50914; }
+        
+        /* Video Modal */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 3000; display: none; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { width: 90%; max-width: 1000px; background: #1a1a1a; border-radius: 12px; overflow: hidden; }
+        .modal-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; background: #141414; }
+        .modal-header h3 { color: #E50914; }
+        .close-modal { background: rgba(255,255,255,0.1); border: none; width: 36px; height: 36px; border-radius: 50%; color: white; cursor: pointer; transition: all 0.3s; }
+        .close-modal:hover { background: #E50914; }
+        .video-container { padding: 0; background: #000; }
+        .video-container video { width: 100%; display: block; }
+        
+        /* Admin Panel */
+        .admin-panel { position: fixed; bottom: 30px; right: 30px; z-index: 200; }
+        .admin-toggle { width: 55px; height: 55px; background: #E50914; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(229,9,20,0.4); }
+        .admin-toggle:hover { transform: scale(1.1); }
+        .admin-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1001; display: none; align-items: center; justify-content: center; }
+        .admin-modal.active { display: flex; }
+        .admin-form { background: #1a1a1a; border-radius: 12px; padding: 30px; width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto; }
+        .admin-form h3, .admin-form h4 { color: #E50914; margin-bottom: 15px; }
+        .admin-form input, .admin-form select, .admin-form textarea { width: 100%; background: #2d2d2d; border: 1px solid #3d3d3d; border-radius: 8px; padding: 12px; color: white; margin-bottom: 15px; outline: none; }
+        .admin-form input:focus { border-color: #E50914; }
+        .admin-form button { background: #E50914; border: none; color: white; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: 600; margin-bottom: 10px; }
+        .checkbox-group { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .season-group { border: 1px solid #3d3d3d; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+        .episode-group { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+        .episode-group input { flex: 1; margin-bottom: 0; }
+        .remove-episode, .remove-season { background: rgba(229,9,20,0.2); border: 1px solid #E50914; color: #E50914; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .add-episode-btn { background: rgba(46,204,113,0.2); border: 1px solid #2ecc71; color: #2ecc71; padding: 8px 12px; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 10px; }
+        .movie-list-admin, .slider-list-admin, .upcoming-list-admin, .series-list-admin { margin-top: 20px; max-height: 250px; overflow-y: auto; }
+        .admin-movie-item, .admin-slider-item, .admin-upcoming-item, .admin-series-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #3d3d3d; gap: 10px; }
+        .delete-movie, .delete-slider, .delete-upcoming, .delete-series { background: rgba(229,9,20,0.2); border: 1px solid #E50914; color: #E50914; padding: 5px 12px; border-radius: 4px; cursor: pointer; }
+        .empty-state { text-align: center; padding: 60px; color: #666; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); color: white; padding: 12px 24px; border-radius: 8px; z-index: 3000; animation: fadeInOut 2s ease; border-left: 4px solid #E50914; }
+        @keyframes fadeInOut { 0% { opacity: 0; transform: translateX(-50%) translateY(20px); } 15% { opacity: 1; transform: translateX(-50%) translateY(0); } 85% { opacity: 1; } 100% { opacity: 0; transform: translateX(-50%) translateY(20px); } }
+        .custom-alert { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; display: none; align-items: center; justify-content: center; }
+        .custom-alert.active { display: flex; }
+        .alert-content { background: #1a1a1a; border-radius: 12px; padding: 30px; text-align: center; max-width: 400px; width: 90%; }
+        .alert-icon { font-size: 60px; color: #E50914; margin-bottom: 20px; }
+        .alert-title { font-size: 24px; font-weight: 700; margin-bottom: 10px; }
+        .alert-message { color: #b3b3b3; margin-bottom: 20px; }
+        .alert-btn { background: #E50914; border: none; color: white; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: 600; }
+        
+        @media (max-width: 768px) {
+            .header { padding: 15px 20px; }
+            .header-content { flex-direction: column; }
+            .slide-title { font-size: 24px; max-width: 100%; }
+            .slide-desc { font-size: 12px; max-width: 100%; }
+            .slide-overlay { padding: 40px 20px 20px; }
+            .categories, .section-title, .movies-container { padding: 0 20px; }
+            .movies-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+        }
+        @media (min-width: 1200px) { .movies-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; } }
+    </style>
+</head>
+<body>
+    <div class="header" id="header">
+        <div class="header-content">
+            <div class="logo"><h1>FLIXHUB</h1></div>
+            <div class="search-box"><input type="text" id="searchInput" placeholder="Search..."><button id="searchBtn"><i class="fas fa-search"></i></button></div>
+            <button class="parent-mode-btn" id="parentModeBtn"><i class="fas fa-child"></i> Parent Mode OFF</button>
+        </div>
+    </div>
+
+    <div class="hero-section"><div class="slider-container"><div class="slider-wrapper" id="sliderWrapper"></div><div class="slider-nav"><button id="prevSlide"><i class="fas fa-chevron-left"></i></button><button id="nextSlide"><i class="fas fa-chevron-right"></i></button></div><div class="slider-dots" id="sliderDots"></div></div></div>
+
+    <div class="categories" id="categoriesContainer"></div>
+
+    <div class="section-title"><i class="fas fa-calendar-alt"></i><span>Upcoming Movies</span><span class="badge">Coming Soon</span></div>
+    <div class="movies-container"><div class="movies-grid" id="upcomingGrid"></div></div>
+
+    <div class="section-title"><i class="fas fa-fire"></i><span>Popular Movies</span><span class="badge">Trending Now</span></div>
+    <div class="movies-container"><div class="movies-grid" id="moviesGrid"></div></div>
+
+    <!-- Seasons Modal -->
+    <div class="seasons-modal" id="seasonsModal">
+        <div class="seasons-container">
+            <div class="seasons-header"><h3 id="seriesTitle">Series Title</h3><button class="close-seasons" onclick="closeSeasonsModal()"><i class="fas fa-times"></i></button></div>
+            <div id="seasonsList"></div>
+        </div>
+    </div>
+
+    <!-- Video Modal -->
+    <div class="modal" id="videoModal"><div class="modal-content"><div class="modal-header"><h3 id="modalTitle">Now Playing</h3><button class="close-modal" onclick="closeModal()"><i class="fas fa-times"></i></button></div><div class="video-container"><video id="videoPlayer" controls playsinline><source id="videoSource" src=""></video></div><div class="modal-download"><button class="modal-download-btn" id="modalDownloadBtn"><i class="fas fa-download"></i> Download</button></div></div></div>
+
+    <div class="custom-alert" id="customAlert"><div class="alert-content"><div class="alert-icon"><i class="fas fa-download"></i></div><div class="alert-title">Download Not Available</div><div class="alert-message" id="alertMessage">Download link not available.</div><button class="alert-btn" onclick="closeAlert()">Close</button></div></div>
+
+    <div class="admin-panel"><div class="admin-toggle" id="adminToggle"><i class="fas fa-cog"></i></div></div>
+    <div class="admin-modal" id="adminModal">
+        <div class="admin-form">
+            <h3><i class="fas fa-lock"></i> Admin Access</h3>
+            <input type="password" id="adminPassword" placeholder="Enter Admin Password"><button id="verifyAdminBtn">Verify</button>
+            <div id="adminContent" style="display: none;">
+                <h4><i class="fas fa-images"></i> 🖼️ Manage Slider Images</h4>
+                <input type="text" id="sliderImgUrl" placeholder="Slider Image URL *"><input type="text" id="sliderTitle" placeholder="Slider Title *">
+                <textarea id="sliderDesc" rows="2" placeholder="Slider Description *"></textarea><input type="text" id="sliderBadge" placeholder="Badge Text">
+                <button id="addSliderBtn">+ Add Slider Image</button><div class="slider-list-admin" id="sliderListAdmin"></div>
+                
+                <h4><i class="fas fa-calendar-plus"></i> 🎬 Manage Upcoming Movies</h4>
+                <input type="text" id="upcomingTitle" placeholder="Movie Title *"><input type="text" id="upcomingYear" placeholder="Release Year *">
+                <input type="text" id="upcomingThumb" placeholder="Thumbnail URL *"><button id="addUpcomingBtn">+ Add Upcoming Movie</button>
+                <div class="upcoming-list-admin" id="upcomingListAdmin"></div>
+                
+                <h4><i class="fas fa-film"></i> 🎬 Manage Movies</h4>
+                <input type="text" id="movieTitle" placeholder="Movie Title *"><input type="text" id="movieYear" placeholder="Year *">
+                <select id="movieCategory"><option value="all">All</option><option value="adult">Adult (18+)</option><option value="parent">Parent Safe</option></select>
+                <input type="text" id="movieThumb" placeholder="Thumbnail URL *"><input type="text" id="movieVideo" placeholder="Video URL *">
+                <div class="checkbox-group"><input type="checkbox" id="parentSafeCheck"><label>✓ Parent Mode Safe (Child Friendly)</label></div>
+                <div class="checkbox-group"><input type="checkbox" id="noDownloadLink"><label>No download link available</label></div>
+                <input type="text" id="downloadLink" placeholder="Download Link (Optional)">
+                <button id="addMovieBtn">+ Add Movie</button><div class="movie-list-admin" id="adminMovieList"></div>
+                
+                <h4><i class="fas fa-tv"></i> 📺 Manage TV Series (Seasons & Episodes)</h4>
+                <input type="text" id="seriesTitleInput" placeholder="Series Title *"><input type="text" id="seriesYearInput" placeholder="Year *">
+                <input type="text" id="seriesThumbInput" placeholder="Thumbnail URL *">
+                <input type="text" id="seriesLinkInput" placeholder="Series Link (Trailer/Preview URL) *">
+                <div class="checkbox-group"><input type="checkbox" id="seriesParentSafe"><label>✓ Parent Mode Safe</label></div>
+                <div id="seasonsContainer"></div>
+                <button type="button" id="addSeasonBtn" style="background: #2ecc71;">+ Add Season</button>
+                <button id="addSeriesBtn">+ Add TV Series</button>
+                <div class="series-list-admin" id="seriesListAdmin"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data
+        let sliderSlides = [
+            { id: 1, img: "https://image.tmdb.org/t/p/w1280/qJ2tW6WMUDux911r6m7haRef0WH.jpg", title: "The Dark Knight", desc: "Epic action thriller.", badge: "TRENDING" },
+            { id: 2, img: "https://image.tmdb.org/t/p/w1280/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg", title: "Inception", desc: "Mind-bending thriller.", badge: "CRITIC'S CHOICE" },
+            { id: 3, img: "https://image.tmdb.org/t/p/w1280/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg", title: "Interstellar", desc: "Journey beyond stars.", badge: "MUST WATCH" }
+        ];
+        
+        let upcomingMovies = [
+            { id: 1, title: "Avatar 3", year: "2025", thumbnail: "https://image.tmdb.org/t/p/w500/6oH378KUfCEitzJkm07r97L0RsZ.jpg", parentSafe: true },
+            { id: 2, title: "Deadpool 3", year: "2024", thumbnail: "https://image.tmdb.org/t/p/w500/8cdWjvZQUkUft69Evvu2NqU0nYP.jpg", parentSafe: false }
+        ];
+        
+        let movies = [
+            { id: 1, title: "The Dark Knight", year: 2008, category: "all", thumbnail: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg", videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", downloadUrl: "", hasDownload: false, rating: 4.8, parentSafe: true },
+            { id: 2, title: "Inception", year: 2010, category: "all", thumbnail: "https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg", videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFunflies.mp4", downloadUrl: "", hasDownload: false, rating: 4.7, parentSafe: true }
+        ];
+        
+        let seriesList = [
+            { id: 1, title: "Stranger Things", year: "2016", thumbnail: "https://image.tmdb.org/t/p/w500/49WJfeNqCm1qK4FrZfP2Dp1UyGA.jpg", seriesLink: "https://www.youtube.com/watch?v=b9EkMc79ZSU", parentSafe: true, seasons: [
+                { seasonNum: 1, episodes: [{ title: "Chapter One", duration: "51 min", videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" }, { title: "Chapter Two", duration: "48 min", videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFunflies.mp4" }] },
+                { seasonNum: 2, episodes: [{ title: "Chapter One", duration: "55 min", videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" }] }
+            ]}
+        ];
+        
+        let currentCategory = "all";
+        let searchQuery = "";
+        let currentMovie = null;
+        let currentSlide = 0;
+        let autoSlideInterval;
+        let startX, isDragging = false;
+        let reminderSetMovies = JSON.parse(localStorage.getItem('flixhub_reminders') || '{}');
+        let parentMode = localStorage.getItem('parentMode') === 'true';
+        let currentSeries = null;
+        
+        function applyParentMode() {
+            const btn = document.getElementById('parentModeBtn');
+            if (parentMode) { btn.classList.add('active'); btn.innerHTML = '<i class="fas fa-child"></i> Parent Mode ON'; }
+            else { btn.classList.remove('active'); btn.innerHTML = '<i class="fas fa-child"></i> Parent Mode OFF'; }
+            renderMovies(); renderUpcoming(); renderSeries();
+        }
+        function toggleParentMode() { parentMode = !parentMode; localStorage.setItem('parentMode', parentMode); applyParentMode(); showToast(parentMode ? 'Parent Mode ON - Adult content hidden' : 'Parent Mode OFF - All content visible'); }
+        
+        // Save/Load functions
+        function saveSliders() { localStorage.setItem('flixhub_sliders', JSON.stringify(sliderSlides)); }
+        function loadSlidersFromStorage() { const saved = localStorage.getItem('flixhub_sliders'); if (saved) sliderSlides = JSON.parse(saved); else saveSliders(); }
+        function saveUpcoming() { localStorage.setItem('flixhub_upcoming', JSON.stringify(upcomingMovies)); }
+        function loadUpcomingFromStorage() { const saved = localStorage.getItem('flixhub_upcoming'); if (saved) upcomingMovies = JSON.parse(saved); else saveUpcoming(); }
+        function saveMovies() { localStorage.setItem('flixhub_movies', JSON.stringify(movies)); }
+        function loadMoviesFromStorage() { const saved = localStorage.getItem('flixhub_movies'); if (saved) movies = JSON.parse(saved); else saveMovies(); }
+        function saveSeries() { localStorage.setItem('flixhub_series', JSON.stringify(seriesList)); }
+        function loadSeriesFromStorage() { const saved = localStorage.getItem('flixhub_series'); if (saved) seriesList = JSON.parse(saved); else saveSeries(); }
+        function saveReminders() { localStorage.setItem('flixhub_reminders', JSON.stringify(reminderSetMovies)); }
+        
+        // Slider functions
+        function renderSlider() {
+            const wrapper = document.getElementById('sliderWrapper');
+            wrapper.innerHTML = sliderSlides.map(slide => `<div class="slide"><img src="${slide.img}"><div class="slide-overlay"><span class="slide-badge"><i class="fas fa-fire"></i> ${slide.badge}</span><div class="slide-title">${slide.title}</div><div class="slide-desc">${slide.desc}</div></div></div>`).join('');
+            updateSliderDots();
+        }
+        function updateSliderDots() {
+            const dotsContainer = document.getElementById('sliderDots');
+            dotsContainer.innerHTML = '';
+            for (let i = 0; i < sliderSlides.length; i++) { const dot = document.createElement('div'); dot.className = 'dot' + (i === currentSlide ? ' active' : ''); dot.addEventListener('click', () => goToSlide(i)); dotsContainer.appendChild(dot); }
+        }
+        function updateSliderPosition() { const wrapper = document.getElementById('sliderWrapper'); wrapper.style.transform = `translateX(-${currentSlide * 100}%)`; document.querySelectorAll('.dot').forEach((dot, i) => dot.classList.toggle('active', i === currentSlide)); }
+        function nextSlide() { currentSlide = (currentSlide + 1) % sliderSlides.length; updateSliderPosition(); resetAutoSlide(); }
+        function prevSlide() { currentSlide = (currentSlide - 1 + sliderSlides.length) % sliderSlides.length; updateSliderPosition(); resetAutoSlide(); }
+        function goToSlide(index) { currentSlide = index; updateSliderPosition(); resetAutoSlide(); }
+        function startAutoSlide() { autoSlideInterval = setInterval(nextSlide, 5000); }
+        function resetAutoSlide() { clearInterval(autoSlideInterval); startAutoSlide(); }
+        function handleTouchStart(e) { startX = e.touches[0].clientX; isDragging = true; }
+        function handleTouchEnd(e) { if (!isDragging) return; const diffX = e.changedTouches[0].clientX - startX; if (Math.abs(diffX) > 50) diffX > 0 ? prevSlide() : nextSlide(); isDragging = false; }
+        
+        function setReminder(movieId, movieTitle) {
+            const btn = document.querySelector(`.reminder-btn[data-id='${movieId}']`);
+            if (reminderSetMovies[movieId]) { delete reminderSetMovies[movieId]; if (btn) { btn.classList.remove('reminder-set'); btn.innerHTML = '<i class="fas fa-bell"></i> Set Reminder'; } showToast(`Reminder removed for "${movieTitle}"`); }
+            else { reminderSetMovies[movieId] = { title: movieTitle, date: new Date().toISOString() }; if (btn) { btn.classList.add('reminder-set'); btn.innerHTML = '<i class="fas fa-bell"></i> Reminder Set ✓'; btn.querySelector('i').classList.add('bell-animation'); setTimeout(() => btn.querySelector('i')?.classList.remove('bell-animation'), 500); } showToast(`🔔 Reminder set for "${movieTitle}"!`); }
+            saveReminders();
+        }
+        
+        function openSeries(series) {
+            currentSeries = series;
+            document.getElementById('seriesTitle').innerHTML = series.title;
+            const seasonsDiv = document.getElementById('seasonsList');
+            seasonsDiv.innerHTML = series.seasons.map((season, idx) => `
+                <div class="season-item">
+                    <div class="season-title" onclick="toggleSeason(${idx})">Season ${season.seasonNum} <i class="fas fa-chevron-down"></i></div>
+                    <div class="episodes-list" id="seasonEpisodes_${idx}">
+                        ${season.episodes.map((ep, epIdx) => `
+                            <div class="episode-item" onclick="playEpisode('${ep.videoUrl}', '${ep.title}')">
+                                <div class="episode-number">${epIdx + 1}</div>
+                                <div class="episode-info"><div class="episode-title">${ep.title}</div><div class="episode-duration">${ep.duration || '45 min'}</div></div>
+                                <div class="episode-play"><i class="fas fa-play-circle"></i></div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('seasonsModal').classList.add('active');
+        }
+        
+        function toggleSeason(idx) { const el = document.getElementById(`seasonEpisodes_${idx}`); el.classList.toggle('show'); }
+        function closeSeasonsModal() { document.getElementById('seasonsModal').classList.remove('active'); }
+        function playEpisode(videoUrl, title) { currentMovie = { title: title, videoUrl: videoUrl }; document.getElementById('modalTitle').innerHTML = title; document.getElementById('videoSource').src = videoUrl; document.getElementById('videoPlayer').load(); document.getElementById('videoModal').classList.add('active'); document.getElementById('videoPlayer').play().catch(e => console.log('Autoplay blocked')); }
+        
+        function renderCategories() {
+            const categories = [
+                { id: 'all', name: 'All Movies' },
+                { id: 'adult', name: 'Adult (18+)' },
+                { id: 'parent', name: 'Parent Safe' },
+                { id: 'series', name: 'TV Series' }
+            ];
+            const container = document.getElementById('categoriesContainer');
+            container.innerHTML = categories.map(cat => `<button class="cat-btn ${currentCategory === cat.id ? 'active' : ''}" data-category="${cat.id}">${cat.name}</button>`).join('');
+            document.querySelectorAll('.cat-btn').forEach(btn => btn.addEventListener('click', () => { currentCategory = btn.dataset.category; renderCategories(); renderMovies(); renderSeriesDisplay(); }));
+        }
+        
+        function renderSeriesDisplay() {
+            if (currentCategory === 'series') {
+                document.getElementById('seriesGrid').style.display = 'grid';
+                renderSeries();
+            } else {
+                document.getElementById('seriesGrid').style.display = 'none';
+            }
+        }
+        
+        function renderUpcoming() {
+            const grid = document.getElementById('upcomingGrid');
+            let filtered = [...upcomingMovies];
+            if (parentMode) filtered = filtered.filter(m => m.parentSafe === true);
+            if (filtered.length === 0) { grid.innerHTML = '<div class="empty-state"><i class="fas fa-calendar-alt"></i><p>No upcoming movies</p></div>'; return; }
+            grid.innerHTML = filtered.map(movie => `<div class="movie-card"><div class="movie-thumbnail"><img src="${movie.thumbnail}"><div class="movie-overlay"><div class="play-icon"><i class="fas fa-play"></i></div></div></div><div class="movie-info"><div class="movie-title">${movie.title}</div><div class="movie-meta"><span class="movie-year">${movie.year}</span><span class="movie-rating"><i class="fas fa-clock"></i> Coming Soon</span></div><button class="reminder-btn ${reminderSetMovies[movie.id] ? 'reminder-set' : ''}" data-id="${movie.id}" onclick="setReminder(${movie.id}, '${movie.title.replace(/'/g, "\\'")}')"><i class="fas fa-bell"></i> ${reminderSetMovies[movie.id] ? 'Reminder Set ✓' : 'Set Reminder'}</button></div></div>`).join('');
+        }
+        
+        function renderMovies() {
+            const grid = document.getElementById('moviesGrid');
+            if (currentCategory === 'series') {
+                grid.style.display = 'none';
+                return;
+            }
+            grid.style.display = 'grid';
+            let filtered = [...movies];
+            if (currentCategory === 'adult') filtered = filtered.filter(m => m.parentSafe === false);
+            else if (currentCategory === 'parent') filtered = filtered.filter(m => m.parentSafe === true);
+            if (parentMode && currentCategory !== 'adult') filtered = filtered.filter(m => m.parentSafe === true);
+            if (searchQuery) filtered = filtered.filter(m => m.title.toLowerCase().includes(searchQuery.toLowerCase()));
+            if (filtered.length === 0) { grid.innerHTML = '<div class="empty-state"><i class="fas fa-film"></i><p>No movies found</p></div>'; return; }
+            grid.innerHTML = filtered.map(movie => `<div class="movie-card" onclick="openMovie(${movie.id})"><div class="movie-thumbnail">${!movie.parentSafe ? '<div class="badge-adult">🔞 18+</div>' : '<div class="badge-child">👶 Safe</div>'}<img src="${movie.thumbnail}"><div class="movie-overlay"><div class="play-icon"><i class="fas fa-play"></i></div></div></div><div class="movie-info"><div class="movie-title">${movie.title}</div><div class="movie-meta"><span class="movie-year">${movie.year}</span><span class="movie-rating"><i class="fas fa-star"></i> ${movie.rating}</span></div><button class="download-btn" onclick="event.stopPropagation(); downloadMovie(${movie.id})"><i class="fas fa-download"></i> Download</button></div></div>`).join('');
+        }
+        
+        function renderSeries() {
+            const grid = document.getElementById('seriesGrid');
+            let filtered = [...seriesList];
+            if (parentMode) filtered = filtered.filter(s => s.parentSafe === true);
+            if (filtered.length === 0) { grid.innerHTML = '<div class="empty-state"><i class="fas fa-tv"></i><p>No series found</p></div>'; return; }
+            grid.innerHTML = filtered.map(series => `<div class="movie-card" onclick="openSeries(${JSON.stringify(series).replace(/"/g, '&quot;')})"><div class="movie-thumbnail"><div class="badge-series"><i class="fas fa-tv"></i> Series</div><img src="${series.thumbnail}"><div class="movie-overlay"><div class="play-icon"><i class="fas fa-play"></i></div></div></div><div class="movie-info"><div class="movie-title">${series.title}</div><div class="movie-meta"><span class="movie-year">${series.year}</span><span class="movie-rating"><i class="fas fa-layer-group"></i> ${series.seasons.length} Seasons</span></div></div></div>`).join('');
+        }
+        
+        function openMovie(id) { currentMovie = movies.find(m => m.id === id); if (currentMovie) { document.getElementById('modalTitle').innerHTML = currentMovie.title; document.getElementById('videoSource').src = currentMovie.videoUrl; document.getElementById('videoPlayer').load(); document.getElementById('videoModal').classList.add('active'); document.getElementById('videoPlayer').play().catch(e => console.log('Autoplay blocked')); } }
+        function closeModal() { document.getElementById('videoPlayer').pause(); document.getElementById('videoModal').classList.remove('active'); }
+        function showAlert(message) { document.getElementById('alertMessage').innerHTML = message; document.getElementById('customAlert').classList.add('active'); }
+        function closeAlert() { document.getElementById('customAlert').classList.remove('active'); }
+        function downloadMovie(id) { const movie = movies.find(m => m.id === id); if (movie && movie.hasDownload && movie.downloadUrl) { const a = document.createElement('a'); a.href = movie.downloadUrl; a.download = `${movie.title}.mp4`; a.click(); showToast(`Downloading ${movie.title}...`); } else { showAlert(`Download link not available`); } }
+        function showToast(msg, isError = false) { const toast = document.createElement('div'); toast.className = 'toast'; toast.style.background = isError ? 'rgba(229,9,20,0.9)' : 'rgba(0,0,0,0.9)'; toast.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-triangle' : 'fa-check-circle'}"></i> ${msg}`; document.body.appendChild(toast); setTimeout(() => toast.remove(), 3000); }
+        
+        // Admin functions
+        let seasonCounter = 0;
+        function addSeasonField() { const container = document.getElementById('seasonsContainer'); const seasonId = Date.now(); container.innerHTML += `<div class="season-group" id="season_${seasonId}"><input type="text" placeholder="Season Number (e.g., 1)" class="season-num"><div class="episodes-list-container" id="episodes_${seasonId}"><div class="episode-group"><input type="text" placeholder="Episode Title"><input type="text" placeholder="Video URL"><button class="remove-episode" onclick="this.parentElement.remove()">✕</button></div></div><button class="add-episode-btn" onclick="addEpisodeField('${seasonId}')">+ Add Episode</button><button class="remove-season" onclick="document.getElementById('season_${seasonId}').remove()">Remove Season</button></div>`; }
+        function addEpisodeField(seasonId) { const container = document.getElementById(`episodes_${seasonId}`); container.innerHTML += `<div class="episode-group"><input type="text" placeholder="Episode Title"><input type="text" placeholder="Video URL"><button class="remove-episode" onclick="this.parentElement.remove()">✕</button></div>`; }
+        
+        function verifyAdmin() { if (document.getElementById('adminPassword').value === 'admin123') { document.getElementById('adminContent').style.display = 'block'; document.getElementById('verifyAdminBtn').style.display = 'none'; renderAdminMovieList(); renderAdminSliderList(); renderAdminUpcomingList(); renderAdminSeriesList(); showToast('Admin access granted!'); } else { showToast('Wrong password!', true); } }
+        function renderAdminMovieList() { document.getElementById('adminMovieList').innerHTML = movies.map(movie => `<div class="admin-movie-item"><span><strong>${movie.title}</strong> (${movie.year}) ${movie.parentSafe ? '👶 Safe' : '🔞 Adult'}</span><button class="delete-movie" onclick="deleteMovie(${movie.id})">Delete</button></div>`).join(''); }
+        function renderAdminSliderList() { document.getElementById('sliderListAdmin').innerHTML = sliderSlides.map((slide, idx) => `<div class="admin-slider-item"><span><strong>${slide.title}</strong></span><button class="delete-slider" onclick="deleteSlider(${idx})">Delete</button></div>`).join(''); }
+        function renderAdminUpcomingList() { document.getElementById('upcomingListAdmin').innerHTML = upcomingMovies.map((movie, idx) => `<div class="admin-upcoming-item"><span><strong>${movie.title}</strong> (${movie.year})</span><button class="delete-upcoming" onclick="deleteUpcoming(${idx})">Delete</button></div>`).join(''); }
+        function renderAdminSeriesList() { document.getElementById('seriesListAdmin').innerHTML = seriesList.map((series, idx) => `<div class="admin-series-item"><span><strong>${series.title}</strong> (${series.year}) - ${series.seasons.length} Seasons</span><button class="delete-series" onclick="deleteSeries(${idx})">Delete</button></div>`).join(''); }
+        
+        function addMovie() { const title = document.getElementById('movieTitle').value.trim(); const year = document.getElementById('movieYear').value.trim(); const thumbnail = document.getElementById('movieThumb').value.trim(); const videoUrl = document.getElementById('movieVideo').value.trim(); const parentSafe = document.getElementById('parentSafeCheck').checked; if (!title || !year || !thumbnail || !videoUrl) { showToast('Please fill all fields!', true); return; } const newId = Math.max(...movies.map(m => m.id), 0) + 1; movies.push({ id: newId, title, year: parseInt(year), category: 'all', thumbnail, videoUrl, downloadUrl: "", hasDownload: false, rating: 4.0, parentSafe }); saveMovies(); renderMovies(); renderAdminMovieList(); renderCategories(); showToast(`✅ "${title}" added!`); document.getElementById('movieTitle').value = ''; document.getElementById('movieYear').value = ''; document.getElementById('movieThumb').value = ''; document.getElementById('movieVideo').value = ''; document.getElementById('parentSafeCheck').checked = false; }
+        function deleteMovie(id) { if (confirm('Delete this movie?')) { movies = movies.filter(m => m.id !== id); saveMovies(); renderMovies(); renderAdminMovieList(); showToast('Movie deleted'); } }
+        
+        function addSeries() { const title = document.getElementById('seriesTitleInput').value.trim(); const year = document.getElementById('seriesYearInput').value.trim(); const thumbnail = document.getElementById('seriesThumbInput').value.trim(); const seriesLink = document.getElementById('seriesLinkInput').value.trim(); const parentSafe = document.getElementById('seriesParentSafe').checked; if (!title || !year || !thumbnail || !seriesLink) { showToast('Please fill all series fields!', true); return; } const seasons = []; document.querySelectorAll('.season-group').forEach(seasonGroup => { const seasonNum = parseInt(seasonGroup.querySelector('.season-num')?.value); if (seasonNum) { const episodes = []; seasonGroup.querySelectorAll('.episode-group').forEach(epGroup => { const epTitle = epGroup.querySelector('input:first-child')?.value; const epUrl = epGroup.querySelector('input:nth-child(2)')?.value; if (epTitle && epUrl) episodes.push({ title: epTitle, duration: "45 min", videoUrl: epUrl }); }); if (episodes.length) seasons.push({ seasonNum, episodes }); } }); const newId = seriesList.length + 1; seriesList.push({ id: newId, title, year, thumbnail, seriesLink, parentSafe, seasons }); saveSeries(); renderSeries(); renderAdminSeriesList(); renderSeriesDisplay(); showToast(`✅ Series "${title}" added!`); document.getElementById('seriesTitleInput').value = ''; document.getElementById('seriesYearInput').value = ''; document.getElementById('seriesThumbInput').value = ''; document.getElementById('seriesLinkInput').value = ''; document.getElementById('seriesParentSafe').checked = false; document.getElementById('seasonsContainer').innerHTML = ''; }
+        function deleteSeries(index) { if (confirm('Delete this series?')) { seriesList.splice(index, 1); saveSeries(); renderSeries(); renderAdminSeriesList(); renderSeriesDisplay(); showToast('Series deleted'); } }
+        
+        function addSlider() { const imgUrl = document.getElementById('sliderImgUrl').value.trim(); const title = document.getElementById('sliderTitle').value.trim(); const desc = document.getElementById('sliderDesc').value.trim(); const badge = document.getElementById('sliderBadge').value.trim() || "FEATURED"; if (!imgUrl || !title || !desc) { showToast('Please fill all slider fields!', true); return; } sliderSlides.push({ id: sliderSlides.length + 1, img: imgUrl, title, desc, badge }); saveSliders(); renderSlider(); renderAdminSliderList(); if (sliderSlides.length === 1) { currentSlide = 0; updateSliderPosition(); } showToast(`✅ Slider added!`); document.getElementById('sliderImgUrl').value = ''; document.getElementById('sliderTitle').value = ''; document.getElementById('sliderDesc').value = ''; document.getElementById('sliderBadge').value = ''; }
+        function deleteSlider(index) { if (confirm('Delete this slider?')) { sliderSlides.splice(index, 1); saveSliders(); renderSlider(); renderAdminSliderList(); if (currentSlide >= sliderSlides.length && sliderSlides.length > 0) currentSlide = sliderSlides.length - 1; else if (sliderSlides.length === 0) currentSlide = 0; updateSliderPosition(); showToast('Slider deleted'); } }
+        
+        function addUpcoming() { const title = document.getElementById('upcomingTitle').value.trim(); const year = document.getElementById('upcomingYear').value.trim(); const thumbnail = document.getElementById('upcomingThumb').value.trim(); if (!title || !year || !thumbnail) { showToast('Please fill all upcoming fields!', true); return; } upcomingMovies.push({ id: upcomingMovies.length + 1, title, year, thumbnail, parentSafe: true }); saveUpcoming(); renderUpcoming(); renderAdminUpcomingList(); showToast(`✅ Upcoming "${title}" added!`); document.getElementById('upcomingTitle').value = ''; document.getElementById('upcomingYear').value = ''; document.getElementById('upcomingThumb').value = ''; }
+        function deleteUpcoming(index) { if (confirm('Delete this upcoming movie?')) { upcomingMovies.splice(index, 1); saveUpcoming(); renderUpcoming(); renderAdminUpcomingList(); showToast('Upcoming deleted'); } }
+        
+        function handleSearch() { searchQuery = document.getElementById('searchInput').value; renderMovies(); }
+        
+        // Event listeners
+        document.getElementById('searchBtn').addEventListener('click', handleSearch);
+        document.getElementById('searchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch(); });
+        document.getElementById('adminToggle').addEventListener('click', () => document.getElementById('adminModal').classList.add('active'));
+        document.getElementById('verifyAdminBtn').addEventListener('click', verifyAdmin);
+        document.getElementById('addMovieBtn').addEventListener('click', addMovie);
+        document.getElementById('addSliderBtn').addEventListener('click', addSlider);
+        document.getElementById('addUpcomingBtn').addEventListener('click', addUpcoming);
+        document.getElementById('addSeriesBtn').addEventListener('click', addSeries);
+        document.getElementById('addSeasonBtn').addEventListener('click', addSeasonField);
+        document.getElementById('modalDownloadBtn').addEventListener('click', () => { if (currentMovie) downloadMovie(currentMovie.id); });
+        document.getElementById('videoModal').addEventListener('click', (e) => { if (e.target === document.getElementById('videoModal')) closeModal(); });
+        document.getElementById('seasonsModal').addEventListener('click', (e) => { if (e.target === document.getElementById('seasonsModal')) closeSeasonsModal(); });
+        document.getElementById('adminModal').addEventListener('click', (e) => { if (e.target === document.getElementById('adminModal')) { document.getElementById('adminModal').classList.remove('active'); document.getElementById('adminContent').style.display = 'none'; document.getElementById('verifyAdminBtn').style.display = 'block'; document.getElementById('adminPassword').value = ''; } });
+        document.getElementById('prevSlide').addEventListener('click', prevSlide);
+        document.getElementById('nextSlide').addEventListener('click', nextSlide);
+        document.getElementById('parentModeBtn').addEventListener('click', toggleParentMode);
+        
+        const sliderContainer = document.querySelector('.slider-container');
+        if (sliderContainer) { sliderContainer.addEventListener('touchstart', handleTouchStart); sliderContainer.addEventListener('touchend', handleTouchEnd); }
+        
+        window.setReminder = setReminder;
+        window.openSeries = openSeries;
+        window.toggleSeason = toggleSeason;
+        window.playEpisode = playEpisode;
+        window.closeSeasonsModal = closeSeasonsModal;
+        window.closeModal = closeModal;
+        window.closeAlert = closeAlert;
+        window.addEpisodeField = addEpisodeField;
+        
+        // Initialize
+        loadSlidersFromStorage();
+        loadUpcomingFromStorage();
+        loadMoviesFromStorage();
+        loadSeriesFromStorage();
+        renderSlider();
+        renderCategories();
+        renderUpcoming();
+        renderMovies();
+        renderSeries();
+        renderSeriesDisplay();
+        applyParentMode();
+        if (sliderSlides.length > 0) { currentSlide = 0; updateSliderPosition(); startAutoSlide(); }
+        
+        console.log('🔥 FlixHub Ready! TV Series category added! Series Link option added in Admin Panel!');
+    </script>
+</body>
+</html>
